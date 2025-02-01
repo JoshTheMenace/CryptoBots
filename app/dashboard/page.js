@@ -108,7 +108,7 @@ export default function DashboardPage() {
         <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight mb-2">
-              My Trading Dashboard
+            The Crypto Clown Car
             </h1>
             <p className="text-lg text-gray-300">
               Overall Portfolio Value:{" "}
