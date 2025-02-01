@@ -3,7 +3,7 @@ import { getLatestPrices } from "../../../coinbaseData"; // Adjust path if neede
 
 async function fetchFallbackPrice(productId) {
   try {
-    const res = await fetch(`https://api.coinbase.com/v2/prices/${productId}/spot`);
+    const res = await fetch(`https://api.coinbase.com/v2/prices/${productId}/spot`, { cache: 'no-store' });
     if (!res.ok) {
       throw new Error("Network response not ok");
     }
