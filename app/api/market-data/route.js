@@ -1,10 +1,7 @@
-// app/api/market-data/route.js
-
 import { NextResponse } from "next/server";
-import { getLatestPrices } from "../../../coinbaseData"; // adjust the path if needed
+import { getLatestPrices } from "../../../coinbaseData"; // Adjust path if needed
 
 async function fetchFallbackPrice(productId) {
-  // e.g. productId: "BTC-USD" or "ETH-USD"
   try {
     const res = await fetch(`https://api.coinbase.com/v2/prices/${productId}/spot`);
     if (!res.ok) {
@@ -21,13 +18,36 @@ async function fetchFallbackPrice(productId) {
 export async function GET(request) {
   const data = getLatestPrices();
 
-  // If both values are still null, use fallback
+  // ✅ If both values are null, use fallback REST API
   if (data.BTC === null && data.ETH === null) {
     console.warn("Market data not yet available; using fallback from Coinbase REST API.");
     const fallbackBTC = await fetchFallbackPrice("BTC-USD");
     const fallbackETH = await fetchFallbackPrice("ETH-USD");
-    return NextResponse.json({ BTC: fallbackBTC, ETH: fallbackETH });
+
+    return new NextResponse(
+      JSON.stringify({ BTC: fallbackBTC, ETH: fallbackETH }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      }
+    );
   }
-  
-  return NextResponse.json(data);
+
+  return new NextResponse(
+    JSON.stringify(data),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
+      },
+    }
+  );
 }
