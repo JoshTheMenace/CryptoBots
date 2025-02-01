@@ -4,96 +4,90 @@ import dynamic from "next/dynamic";
 import { getDatabase, ref, onValue } from "firebase/database"; // Firebase Realtime DB
 import { getLatestPrice } from "../coinbasePriceFeed"; // Real-time price feed
 
-// Dynamically import ApexCharts
+// Dynamically import ApexCharts for client-side rendering
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-export default function BotChart({ botId, userId }) {
+export default function BotChart({ botId, userId, trades, botBalances }) {
   const db = getDatabase();
 
-  // 🔹 Market Data (Updated Every 30 Seconds)
+  // 🔹 Market Data for BTC Chart
   const [marketData, setMarketData] = useState([]);
-
-  // 🔹 Trades (Fetched from Firebase)
-  const [trades, setTrades] = useState([]);
-
-  // 🔹 Bot Balances
-  const [botBalances, setBotBalances] = useState({ USD: 0, BTC: 0, ETH: 0 });
-
+  // 🔹 Live BTC/ETH Prices
+  const [liveBTCPrice, setLiveBTCPrice] = useState(getLatestPrice("BTC") || 0);
+  const [liveETHPrice, setLiveETHPrice] = useState(getLatestPrice("ETH") || 0);
+  const [liveXRPPrice, setLiveXRPPrice] = useState(getLatestPrice("XRP") || 0);
   // 🔹 Total Bot Value
   const [totalBotValue, setTotalBotValue] = useState(0);
 
-  // 🔹 Market Prices (to track real-time updates)
-  const [liveBTCPrice, setLiveBTCPrice] = useState(getLatestPrice("BTC") || 0);
-  const [liveETHPrice, setLiveETHPrice] = useState(getLatestPrice("ETH") || 0);
+  // 🔹 Optional: If you prefer fetching trades in this component (instead of receiving via props), uncomment:
+  /*
+  const [trades, setTrades] = useState([]);
 
-  // 🔹 Fetch Trades from Firebase in Real-Time
   useEffect(() => {
     const tradesRef = ref(db, `bots/${userId}/${botId}/trades`);
     onValue(tradesRef, (snapshot) => {
       if (snapshot.exists()) {
         const tradeData = Object.values(snapshot.val());
-        // Keep only trades at 1-minute intervals (last 60 minutes)
-        const filteredTrades = tradeData.filter(
-          (trade) => Date.now() - trade.time < 60 * 60 * 1000
-        );
-        setTrades(filteredTrades);
+        // Example filtering...
+        setTrades(tradeData);
       }
     });
   }, [botId, userId]);
+  */
 
-  // 🔹 Fetch Bot Balances from Firebase in Real-Time
-  useEffect(() => {
-    const balanceRef = ref(db, `bots/${userId}/${botId}/balances`);
-    onValue(balanceRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setBotBalances(snapshot.val()); // ✅ Update botBalances in real-time
-      }
-    });
-  }, [botId, userId]);
-
-  // 🔹 Fetch Market Data (Every 15 Seconds)
+  // 🔹 Update Live Market Data every 15 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       const btcPrice = getLatestPrice("BTC");
       const ethPrice = getLatestPrice("ETH");
-
-      if (btcPrice) setLiveBTCPrice(btcPrice);
-      if (ethPrice) setLiveETHPrice(ethPrice);
+      const xrpPrice = getLatestPrice("XRP");
 
       if (btcPrice) {
+        setLiveBTCPrice(btcPrice);
+        // Keep last 100 data points for the BTC chart
         setMarketData((prev) => [
-          ...prev.slice(-100), // Keep last 100 data points
+          ...prev.slice(-99),
           { x: new Date().getTime(), y: btcPrice },
         ]);
       }
-    }, 15000); // 15s interval
+      if (ethPrice) {
+        setLiveETHPrice(ethPrice);
+      }
+      if (xrpPrice) {
+        setLiveXRPPrice(xrpPrice);
+      }
+
+    }, 15000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // 🔹 Calculate Total Bot Value When Market Data or Balances Change
+  // 🔹 Calculate Total Bot Value whenever balances or prices change
   useEffect(() => {
-    console.log("🔥 Recalculating Bot Value...");
-    if (botBalances) {
-      console.log("📊 Bot Balances:", botBalances);
-      const newTotalValue =
-        (botBalances.USD || 0) +
-        (botBalances.BTC || 0) * liveBTCPrice +
-        (botBalances.ETH || 0) * liveETHPrice;
+    const usd = botBalances?.USD || 0;
+    const btc = botBalances?.BTC || 0;
+    const eth = botBalances?.ETH || 0;
+    const xrp = botBalances?.XRP || 0;
+    const newTotal =
+      usd + btc * liveBTCPrice + eth * liveETHPrice; + xrp * liveXRPPrice;
 
-      setTotalBotValue(newTotalValue); // ✅ Ensure this updates dynamically
-    }
-  }, [botBalances, liveBTCPrice, liveETHPrice]); // 🔥 Recalculate when market prices OR balances change
+    setTotalBotValue(newTotal);
+  }, [botBalances, liveBTCPrice, liveETHPrice, liveXRPPrice]);
 
-  // 🔹 Chart Configuration
+  // 🔹 ApexCharts Configuration
   const options = {
     chart: {
       type: "line",
       background: "transparent",
       animations: { enabled: true },
+      toolbar: { show: false },
     },
     xaxis: {
       type: "datetime",
+      labels: { style: { colors: "#ccc" } },
+    },
+    yaxis: {
+      labels: { style: { colors: "#ccc" } },
     },
     stroke: {
       curve: "smooth",
@@ -102,9 +96,13 @@ export default function BotChart({ botId, userId }) {
     markers: {
       size: 0,
     },
-    // 🔹 Trade Annotations (Buy/Sell Markers)
+    tooltip: {
+      theme: "dark",
+      x: { format: "HH:mm:ss" },
+    },
+    // 🔹 Annotate Buy/Sell trades
     annotations: {
-      points: trades.map((trade) => ({
+      points: trades?.map((trade) => ({
         x: trade.time,
         y: trade.price,
         marker: {
@@ -117,73 +115,78 @@ export default function BotChart({ botId, userId }) {
           text: trade.side.toUpperCase(),
           style: {
             color: "#fff",
-            background: trade.side === "buy" ? "#00c853" : "#d50000",
+            backgroundColor: trade.side === "buy" ? "#00c853" : "#d50000",
           },
         },
       })),
-    },
-    tooltip: {
-      x: {
-        format: "dd MMM yyyy HH:mm:ss",
-      },
     },
   };
 
   const series = [
     {
-      name: "BTC Price (30s intervals)",
+      name: "BTC Price",
       data: marketData,
     },
   ];
 
   return (
-    <div className="p-4 bg-white rounded shadow-md">
-      {/* 🔹 Header Section */}
-      <h2 className="text-xl font-semibold mb-4">Trading Bot Dashboard</h2>
-      <p className="text-gray-600">Live Market & Trade Analysis</p>
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-lg">
+      {/* 🔹 Title and Live Data */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-white">
+          Live Market & Trade Analysis
+        </h2>
+        <p className="text-sm text-gray-300 mt-2">
+          Real-time BTC chart and your bot’s trading history.
+        </p>
+      </div>
 
-      {/* 🔹 Bot Value Display */}
-      <div className="p-4 rounded-lg bg-gray-100 flex items-center justify-between mt-4">
+      {/* 🔹 Bot Value + Current Prices */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6 bg-white/10 rounded-lg p-4 justify-between">
         <div>
-          <p className="text-sm text-gray-600">Bot’s Total Value</p>
-          <h2 className="text-2xl font-bold text-green-700">
+          <p className="text-gray-200 text-xs">Bot’s Total Value</p>
+          <h3 className="text-2xl font-bold text-green-400">
             ${totalBotValue.toFixed(2)}
-          </h2>
+          </h3>
         </div>
-        <div className="space-x-6 flex">
+        <div className="flex items-center gap-6">
           <div>
-            <p className="text-xs text-gray-500">BTC Price</p>
-            <p className="text-sm font-semibold">${liveBTCPrice.toFixed(2)}</p>
+            <p className="text-gray-200 text-xs">BTC Price</p>
+            <p className="text-lg font-semibold">${liveBTCPrice.toFixed(2)}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">ETH Price</p>
-            <p className="text-sm font-semibold">${liveETHPrice.toFixed(2)}</p>
+            <p className="text-gray-200 text-xs">ETH Price</p>
+            <p className="text-lg font-semibold">${liveETHPrice.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-gray-200 text-xs">XRP Price</p>
+            <p className="text-lg font-semibold">${liveXRPPrice.toFixed(2)}</p>
           </div>
         </div>
       </div>
 
-      {/* 🔹 Balance Display */}
-      <div className="grid grid-cols-3 gap-4 mt-4">
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-gray-800 text-sm">USD Balance</h3>
-          <p className="text-lg font-semibold">${botBalances.USD.toFixed(2)}</p>
+      {/* 🔹 Balances */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-white/10 rounded-lg p-4 text-center">
+          <p className="text-gray-200 text-sm">USD Balance</p>
+          <p className="text-lg font-bold">${botBalances.USD.toFixed(2)}</p>
         </div>
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-gray-800 text-sm">BTC Balance</h3>
-          <p className="text-lg font-semibold">
+        <div className="bg-white/10 rounded-lg p-4 text-center">
+          <p className="text-gray-200 text-sm">BTC Balance</p>
+          <p className="text-lg font-bold">
             {botBalances.BTC.toFixed(6)} BTC
           </p>
         </div>
-        <div className="p-4 border rounded-lg bg-gray-50">
-          <h3 className="text-gray-800 text-sm">ETH Balance</h3>
-          <p className="text-lg font-semibold">
+        <div className="bg-white/10 rounded-lg p-4 text-center">
+          <p className="text-gray-200 text-sm">ETH Balance</p>
+          <p className="text-lg font-bold">
             {botBalances.ETH.toFixed(6)} ETH
           </p>
         </div>
       </div>
 
-      {/* 🔹 Chart Display */}
-      <div className="bg-white p-4 rounded-lg shadow mt-4">
+      {/* 🔹 Chart Component */}
+      <div className="bg-white/5 rounded-lg p-4">
         <Chart options={options} series={series} type="line" height={400} />
       </div>
     </div>

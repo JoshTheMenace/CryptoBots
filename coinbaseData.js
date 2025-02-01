@@ -1,7 +1,7 @@
 // coinbaseData.js
 import WebSocket from "ws";
 
-let latestPrices = { BTC: null, ETH: null };
+let latestPrices = { BTC: null, ETH: null, XRP: null };
 
 function connectToCoinbase() {
   const COINBASE_WS_URL = "wss://ws-feed.exchange.coinbase.com";
@@ -12,7 +12,7 @@ function connectToCoinbase() {
     ws.send(
       JSON.stringify({
         type: "subscribe",
-        channels: [{ name: "ticker", product_ids: ["BTC-USD", "ETH-USD"] }],
+        channels: [{ name: "ticker", product_ids: ["BTC-USD", "ETH-USD", "XRP-USD"] }],
       })
     );
   });
@@ -20,13 +20,17 @@ function connectToCoinbase() {
   ws.on("message", (data) => {
     try {
       const message = JSON.parse(data);
+      console.log("📈 Received message:", message);
       if (message.type === "ticker") {
         if (message.product_id === "BTC-USD") {
           latestPrices.BTC = parseFloat(message.price);
-          console.log("Updated BTC:", latestPrices.BTC);
+          // console.log("Updated BTC:", latestPrices.BTC);
         } else if (message.product_id === "ETH-USD") {
           latestPrices.ETH = parseFloat(message.price);
-          console.log("Updated ETH:", latestPrices.ETH);
+          // console.log("Updated ETH:", latestPrices.ETH);
+        } else if (message.product_id === "XRP-USD") {
+          latestPrices.XRP = parseFloat(message.price);
+          console.log("Updated XRP:", latestPrices.XRP); // Uncomment for XRP
         }
       }
     } catch (error) {

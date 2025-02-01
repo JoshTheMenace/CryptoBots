@@ -21,10 +21,11 @@ export async function GET(request) {
   const data = getLatestPrices();
 
   // ✅ If both values are null, use fallback REST API
-  if (data.BTC === null && data.ETH === null) {
+  if (data.BTC === null && data.ETH === null && data.XRP === null) {
     console.warn("Market data not yet available; using fallback from Coinbase REST API.");
     const fallbackBTC = await fetchFallbackPrice("BTC-USD");
     const fallbackETH = await fetchFallbackPrice("ETH-USD");
+    const fallbackXRP = await fetchFallbackPrice("XRP-USD");
 
     return new NextResponse(
       JSON.stringify({ BTC: fallbackBTC, ETH: fallbackETH }),

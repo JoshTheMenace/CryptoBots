@@ -17,8 +17,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (!firebaseUser) router.push("/");
-      else setUser(firebaseUser);
+      if (!firebaseUser) {
+        router.push("/");
+      } else {
+        setUser(firebaseUser);
+      }
     });
     return () => unsubscribe();
   }, [router]);
@@ -72,7 +75,7 @@ export default function DashboardPage() {
     if (!name) return;
 
     const userBotsRef = ref(db, `bots/${user.uid}`);
-    const newBotRef = push(userBotsRef); // Generates unique bot ID
+    const newBotRef = push(userBotsRef); // Generates a unique bot ID
 
     // Seed the new bot with $10,000 USD and zero crypto
     await set(ref(db, `bots/${user.uid}/${newBotRef.key}`), {
@@ -89,34 +92,47 @@ export default function DashboardPage() {
     console.log("✅ Bot Created:", newBotRef.key);
   }
 
-  if (!user)
-    return <div className="p-4 text-center">Loading user...</div>;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-black text-white">
+        <p className="text-xl animate-pulse">Loading user...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            My Trading Dashboard
-          </h1>
-          <p className="text-lg text-gray-600">
-            Overall Portfolio Value:{" "}
-            <span className="font-semibold">
-              ${overallBalance.toFixed(2)}
-            </span>
-          </p>
-        </header>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-gray-900 text-white">
+      {/* Top Container */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Header */}
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+              My Trading Dashboard
+            </h1>
+            <p className="text-lg text-gray-300">
+              Overall Portfolio Value:{" "}
+              <span className="text-2xl font-semibold text-white ml-1">
+                ${overallBalance.toFixed(2)}
+              </span>
+            </p>
+          </div>
 
-        <div className="mb-6 flex justify-between items-center">
           <button
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-400 hover:to-pink-400 px-6 py-3 rounded-lg shadow-lg font-semibold transition-transform transform hover:scale-105 focus:outline-none"
             onClick={handleCreateBot}
           >
             Create Bot
           </button>
-        </div>
+        </header>
 
-        <BotList bots={bots} userId={user.uid} marketData={marketData} />
+        {/* Bot List Section */}
+        <div
+          className="bg-white/5 rounded-xl p-6 shadow-lg 
+                     backdrop-blur-sm border border-white/10"
+        >
+          <BotList bots={bots} userId={user.uid} marketData={marketData} />
+        </div>
       </div>
     </div>
   );
