@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // ✅ Ensures this API runs dynamically on every request
+
 import { NextResponse } from "next/server";
 import { getLatestPrices } from "../../../coinbaseData"; // Adjust path if needed
 
