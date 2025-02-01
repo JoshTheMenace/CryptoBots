@@ -11,6 +11,14 @@
     ],
     "frameworksBackend": {
       "region": "us-central1"
-    }
+    },
+    "headers": [
+      {
+        "source": "/api/market-data",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate" }
+        ]
+      }
+    ]
   }
 }
