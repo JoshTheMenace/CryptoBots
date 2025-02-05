@@ -6,6 +6,10 @@
 
 CryptoBots is an AI-driven cryptocurrency trading system that leverages **Genetic Neural Networks** and **Reinforcement Learning** to optimize trading strategies. The project features multiple trading bots, including a **GNN-based trader**, a **reinforcement learning bot**, and **nine additional strategy-based bots**, all evaluated for performance.
 
+![image](https://github.com/user-attachments/assets/3cb2e404-040c-428f-aac0-7ac7d9415660)
+
+
+
 ## 🏆 Hackathon Project
 This project was built for a **hackathon**
 
