@@ -20,15 +20,15 @@ This project was built for a **hackathon**
 
 ---
 
-📊 Trading Strategies Implemented
-1️⃣ Genetic Neural Network (GNN)
+## 📊 Trading Strategies Implemented
+1️⃣ **Genetic Neural Network (GNN)**
     Evolves a neural network over generations.
     Optimizes based on historical data.
     Adapts to changing market conditions.
 
-2️⃣ Reinforcement Learning Bot
+2️⃣ **Reinforcement Learning Bot**
     Uses Q-learning or DDPG to maximize long-term profits.
     Learns from past trades to improve decision-making.
 
-3️⃣ Nine Additional Strategy-Based Bots
+3️⃣ **Nine Additional Strategy-Based Bots**
     Includes MACD, RSI, Bollinger Bands, Mean Reversion, and others.
