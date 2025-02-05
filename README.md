@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 CryptoBots: AI-Powered Crypto Trading Bots
 
-## Getting Started
+![CryptoBots](https://img.shields.io/github/stars/JoshTheMenace/CryptoBots?style=social)
+![GitHub license](https://img.shields.io/github/license/JoshTheMenace/CryptoBots)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
-First, run the development server:
+CryptoBots is an AI-driven cryptocurrency trading system that leverages **Genetic Neural Networks** and **Reinforcement Learning** to optimize trading strategies. The project features multiple trading bots, including a **GNN-based trader**, a **reinforcement learning bot**, and **nine additional strategy-based bots**, all evaluated for performance.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🏆 Hackathon Project
+This project was built for a **hackathon**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ✨ Features
+✅ **AI-Powered Bots** – Uses a Genetic Neural Network and Reinforcement Learning for trading.  
+✅ **Multiple Trading Strategies** – Compares GNN-based bot against other trading methods.  
+✅ **Performance Dashboard** – Visual analytics to track trading bot results.  
+✅ **Secure Firebase Integration** – Stores bot balances, trades, and configurations safely.  
+✅ **Customizable Trading Strategies** – Easily modify and test different trading models.  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+📊 Trading Strategies Implemented
+1️⃣ Genetic Neural Network (GNN)
+    Evolves a neural network over generations.
+    Optimizes based on historical data.
+    Adapts to changing market conditions.
 
-To learn more about Next.js, take a look at the following resources:
+2️⃣ Reinforcement Learning Bot
+    Uses Q-learning or DDPG to maximize long-term profits.
+    Learns from past trades to improve decision-making.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3️⃣ Nine Additional Strategy-Based Bots
+    Includes MACD, RSI, Bollinger Bands, Mean Reversion, and others.
